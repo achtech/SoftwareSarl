@@ -30,15 +30,19 @@ $_SESSION['breadcrumb_nav4'] = "";
                 <div class="panel-body">
                     <div class="row">
                        	<form name="frm1" action="" method="post" >
-                            <div class="col-lg-4">	
+                            <div class="col-lg-3">	
                                 <div class="form-group">
                                     <label class="control-label">Salarie:</label>
                                     <div class="controls">
                                         <input type="text" name="txtrechercher" value="<?php if (isset($_POST['txtrechercher'])) echo $_POST['txtrechercher']; ?>" class="form-control input-small-recherche" />
                                     </div>
                                 </div>
+                                <div class="form-actions">
+                                    <input type="submit" name="v" class="btn btn-primary" value="<?php echo _RECHERCHE . "r" ?>" />
+                                </div>
+    
                             </div>
-                            <div class="col-lg-4">	
+                            <div class="col-lg-3">	
                                 <div class="form-group">
                                     <label class="control-label">Date Pointage entre:</label>
                                     <div class="controls">
@@ -46,7 +50,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">	
+                            <div class="col-lg-3">	
                                 <div class="form-group">
                                     <label class="control-label">Et :</label>
                                     <div class="controls">
@@ -54,11 +58,16 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     </div>
                                 </div>
 
-                                <div class="form-actions">
-                                    <input type="submit" name="v" class="btn btn-primary" value="<?php echo _RECHERCHE . "r" ?>" />
-
+                               </div>
+                               <div class="col-lg-3">  
+                                    <div class="form-group">
+                                        <label class="control-label"></label>
+                                            <?php $value=isset($_REQUEST['moisCourant']) ? "checked":"" ?>
+                                            <input type="checkbox" name="moisCourant" <?php echo $value ?>  onchange="document.frm1.submit()"> Mois Courant
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
+
                         </form>
                     </div>
                 </div>
@@ -73,6 +82,9 @@ $_SESSION['breadcrumb_nav4'] = "";
                     <div class="table-responsive">
                         <?php
                         $where1 = "";
+                        $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
+                        $datefin = date('Y-m-d',strtotime('last day of this month', time()));
+                        
                         if (isset($_POST['txtrechercher']) && !empty($_REQUEST['txtrechercher']))
                             $where1 .= " and id_personnels in (select ID from users where  nom like '%" . $_POST['txtrechercher'] . "%' or login like '%" . $_POST['txtrechercher'] . "%') ";
 
@@ -81,6 +93,11 @@ $_SESSION['breadcrumb_nav4'] = "";
 
                         if (isset($_POST['dateFin']) && !empty($_REQUEST['dateFin']))
                             $where1 .= " and date_pointage <= DATE_FORMAT('" . $_POST['dateFin'] . "', '%Y-%m-%d')";
+
+                        if (isset($_POST['moisCourant']) && !empty($_REQUEST['moisCourant']))
+                        {
+                            $where1 .= " and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
+                        }    
 
                         $sql = "select id,id_personnels,date_pointage,m_start,m_end,s_start,s_end,ADDTIME(TIMEDIFF(m_end, m_start),TIMEDIFF(s_end, s_start )) as d from pointages where 1=1 " . $where1 . " order by id desc";
                         $res = doQuery($sql);
@@ -98,7 +115,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                                 </tr>
                                 <tr>
                                     <td><?php echo isset($_POST['dateDebut']) && !empty($_REQUEST['dateDebut']) && $_POST['dateDebut'] != 1 ? $_REQUEST['dateDebut'] : "Non d&eacute;fini" ?></td>
-                                    <td><?php echo isset($_POST['dateFin']) && !empty($_REQUEST['dateFin']) && $_POST['dateFin'] != 1 ? $_REQUEST['dateFin'] : "Non défini" ?></td>
+                                    <td><?php echo isset($_POST['dateFin']) && !empty($_REQUEST['dateFin']) && $_POST['dateFin'] != 1 ? $_REQUEST['dateFin'] : "Non d&eacute;fini" ?></td>
                                     <td><?php echo getSommeNombreHeurN($where1) ?></td>
                                 </tr>
                             </table>

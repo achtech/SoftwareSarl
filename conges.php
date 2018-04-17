@@ -75,12 +75,18 @@ $_SESSION['breadcrumb_nav4'] = "";
                         $where1 = "";
                         if (isset($_POST['txtrechercher']) && !empty($_REQUEST['txtrechercher']))
                             $where1 .= " and id_personnels in (select ID from users where  nom like '%" . $_POST['txtrechercher'] . "%' or login like '%" . $_POST['txtrechercher'] . "%') ";
-//TODO
-                        if (isset($_POST['dateDebut']) && !empty($_REQUEST['dateDebut']))
-                            $where1 .= " and date_pointage >= DATE_FORMAT('" . $_POST['dateDebut'] . "', '%Y-%m-%d')";
 
-                        if (isset($_POST['dateFin']) && !empty($_REQUEST['dateFin']))
-                            $where1 .= " and date_pointage <= DATE_FORMAT('" . $_POST['dateFin'] . "', '%Y-%m-%d')";
+                        if (isset($_POST['dateDebut']) && !empty($_REQUEST['dateDebut']) && isset($_POST['dateFin']) && !empty($_REQUEST['dateFin']))
+                            $where1 .= " and ( 
+                        date_debut between DATE_FORMAT('" . $_POST['dateDebut'] . "', '%Y-%m-%d') and DATE_FORMAT('" . $_POST['dateFin'] . "', '%Y-%m-%d') 
+                        or date_fin between DATE_FORMAT('" . $_POST['dateDebut'] . "', '%Y-%m-%d') and DATE_FORMAT('" . $_POST['dateFin'] . "', '%Y-%m-%d')
+                        or (date_debut > DATE_FORMAT('" . $_POST['dateDebut'] . "', '%Y-%m-%d') and date_fin <  DATE_FORMAT('" . $_POST['dateFin'] . "', '%Y-%m-%d'))
+                        or (date_debut < DATE_FORMAT('" . $_POST['dateDebut'] . "', '%Y-%m-%d') and date_fin >  DATE_FORMAT('" . $_POST['dateFin'] . "', '%Y-%m-%d')))";
+
+                    
+                        if (isset($_POST['moisCourant']) && !empty($_REQUEST['moisCourant']))
+                            $where1 .= " and date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
+
 
                         $sql = "select id,id_personnels,date_debut,date_fin from conges where 1=1 " . $where1 . " order by id desc";
                         $res = doQuery($sql);

@@ -39,6 +39,27 @@
                 </ul>
             </li>
             <li>
+                <a href="#"><i class="glyphicon glyphicon-time"></i> Reports<span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li>
+                        <a href="pointagesMensuelle.php" >
+                            <i class="glyphicon glyphicon-list-alt"></i> Pointage Mensuel
+                        </a>
+                    </li>
+                    <li>
+                        <a href="congesMensuelle.php" >
+                            <i class="glyphicon glyphicon-list-alt"></i> Conge Mensuel
+                        </a>
+                    </li>
+                    <li>
+                        <a href="CongeAnnuelle.php" >
+                            <i class="glyphicon glyphicon-list-alt"></i> Conge Annuel
+                        </a>
+                    </li>
+                    
+                </ul></a>
+            </li>                    
+            <li>
                 <a href="database.php"><i class="fa fa-dashboard"></i> Base de donn&eacute;e</a>
             </li>
             <?php } ?>

@@ -1278,7 +1278,6 @@ function genererFichPaiement($start,$end,$datePaiement,$sql){
 }*/
 
 function nombreJour($datedeb,$datefin){
-    
     $nb_jours=0;
     $dated=explode('-',$datedeb);
     $datef=explode('-',$datefin);
@@ -1292,5 +1291,23 @@ function nombreJour($datedeb,$datefin){
       $timestampcurr=mktime(0,0,0,date('m',$timestampcurr),(date('d',$timestampcurr)+1)   ,date('Y',$timestampcurr));
     }
     return $nb_jours;
+}
+function getRapportMoisActuelle($user,$currentMonth,$year,$month){
+    $nbrJour =0;
+    if($currentMonth==1){
+        $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
+        $datefin = date('Y-m-d');
+        $nbrJour = nombreJour($datedebut,$datefin);
+    }else if(!empty($year) && !empty($month)){
+        $datedebut = date('Y-m-d',strtotime($year."-".$month."-01"));
+        $datefin = date('Y-m-d',strtotime($year."-".$month."-31"));
+        $nbrJour = nombreJour($datedebut,$datefin);
+    } else {
+        $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
+        $datefin = date('Y-m-d');
+        $nbrJour = nombreJour($datedebut,$datefin);
+    }
+    return $nbrJour*8;
+   // return $user."--".$currentMonth."--".$year."--".$month;
 }
 ?>
