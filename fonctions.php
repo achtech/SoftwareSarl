@@ -1248,8 +1248,7 @@ function getPaiementsData($start,$end,$sql){
     $res = doQuery($sql);
     $nb = mysql_num_rows($res);
     $tab = array();
-
-$i=0;
+    $i=0;
     while ($ligne = mysql_fetch_array($res)) {
         $tab[$i][0]=$ligne['CODE'];
         $tab[$i][1]=$ligne['PRENOM']." ".$ligne['NOM'];
@@ -1281,18 +1280,22 @@ function nombreJour($datedeb,$datefin){
     $nb_jours=0;
     $dated=explode('-',$datedeb);
     $datef=explode('-',$datefin);
-    $timestampcurr=mktime(0,0,0,$dated[1],$dated[2],$dated[0]);
-    $timestampf=mktime(0,0,0,$datef[1],$datef[2],$datef[0]);
-    while($timestampcurr<=$timestampf){
- 
-      if((date('w',$timestampcurr)!=0)&&(date('w',$timestampcurr)!=6)){
-        $nb_jours++;
-      }
-      $timestampcurr=mktime(0,0,0,date('m',$timestampcurr),(date('d',$timestampcurr)+1)   ,date('Y',$timestampcurr));
+    if(count($dated)==3 && count($datef)==3){
+        $timestampcurr=mktime(0,0,0,$dated[1],$dated[2],$dated[0]);
+        $timestampf=mktime(0,0,0,$datef[1],$datef[2],$datef[0]);
+        while($timestampcurr<=$timestampf){
+     
+          if((date('w',$timestampcurr)!=0)&&(date('w',$timestampcurr)!=6)){
+            $nb_jours++;
+          }
+          $timestampcurr=mktime(0,0,0,date('m',$timestampcurr),(date('d',$timestampcurr)+1)   ,date('Y',$timestampcurr));
+        }
+        return $nb_jours;
+    }else{
+        return 0;
     }
-    return $nb_jours;
 }
-function getRapportMoisActuelle($user,$currentMonth,$year,$month){
+function getNombreHeur($currentMonth,$year,$month){
     $nbrJour =0;
     if($currentMonth==1){
         $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
@@ -1300,14 +1303,135 @@ function getRapportMoisActuelle($user,$currentMonth,$year,$month){
         $nbrJour = nombreJour($datedebut,$datefin);
     }else if(!empty($year) && !empty($month)){
         $datedebut = date('Y-m-d',strtotime($year."-".$month."-01"));
-        $datefin = date('Y-m-d',strtotime($year."-".$month."-31"));
+        $datefin = date('Y-m-t',strtotime($year."-".$month."-20"));
         $nbrJour = nombreJour($datedebut,$datefin);
     } else {
         $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
         $datefin = date('Y-m-d');
         $nbrJour = nombreJour($datedebut,$datefin);
     }
-    return $nbrJour*8;
-   // return $user."--".$currentMonth."--".$year."--".$month;
+    return ($nbrJour*8);
+}
+
+function getRapportMoisActuelle($user,$currentMonth,$year,$month,$time){
+    if(!empty($user)) {
+        $nbrHeur = getNombreHeur($currentMonth,$year,$month);
+        $conge = getNombreJourConge($user,$currentMonth,$year,$month)*8;
+        $jourFerie = getNombreHeurJourFerie($currentMonth,$year,$month);
+        $tabH= explode(":", $time);
+        if(count($tabH)==3){
+            $h = (int)$tabH[0]+(int)$conge+(int)$jourFerie-$nbrHeur;
+            return $h.":$tabH[1]:$tabH[2]";            
+        }else
+            return 0;
+    } else {
+        return 0;
+    }
+}
+
+function getMinDate($user){
+    $req = "select min(date_pointage) as minDate from pointages where id_personnels=".$user;
+     $res = doQuery($req);
+    $nb = mysql_num_rows($res);
+    $minDate = "";
+    while ($ligne = mysql_fetch_array($res)) {
+        $minDate=$ligne['minDate'];
+    }
+    return $minDate;
+}
+
+function getSumHours($datefin,$datedebut,$user){
+    $sql = "SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime
+    FROM pointages
+    WHERE id_personnels=".$user." and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
+    $res = doQuery($sql);
+    $sumTime=0;
+    $nb = mysql_num_rows($res);
+    while ($ligne = mysql_fetch_array($res)) {
+            $sumTime=$ligne['sumTime'];
+        }
+    return $sumTime;
+}
+
+
+function getRapport($user){
+    if(!empty($user)) {
+        // get first date for the selected user (select min date from pointage)
+        $minDate = getMinDate($user);
+        // get the current date
+        $currentDate = date("Y-m-d");
+        // get number of days
+        $nbJour = nombreJour($minDate,$currentDate);
+        // get sum of worked hours
+        $sumDate = getSumHours($currentDate,$minDate,$user);
+        // calculate the report
+        $tabH= explode(":", $sumDate);
+        if(count($tabH)==3){
+            return ((int)$tabH[0]-($nbJour*8)).":$tabH[1]:$tabH[2]";
+        }else{
+            return 0;
+        }
+    }
+    else {
+        return 0;
+    }
+}
+
+function getNombreJourConge($user,$currentMonth,$year,$month){
+    
+    $sum = 0;
+    if(!empty($currentMonth) || !empty($year) || !empty($month) ){
+        
+            $datedebut = !empty($currentMonth) ? date('Y-m-d',strtotime('first day of this month', time())) : $year."-".$month."-01";
+           //TODO VERIFY LAST DAY IN SELECTED MONTH
+            $datefin = !empty($currentMonth) ? date('Y-m-d',strtotime('last day of this month', time())) : $year."-".$month."-31";;
+    }else{
+        $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
+        $datefin = date('Y-m-d');        
+    }
+     $sql = "SELECT * FROM conges WHERE id_personnels=".$user." 
+    and ( date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
+     or date_fin between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
+     or date_debut > DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and date_fin < DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
+     or date_debut < DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and date_fin > DATE_FORMAT('" . $datefin. "', '%Y-%m-%d'))";
+    $res = doQuery($sql);
+    $tab = array();
+    $nb = mysql_num_rows($res);
+
+    $i=0;
+    while ($ligne = mysql_fetch_array($res)) {
+        $tab[$i]["d1"]=$ligne['date_debut'];
+        $tab[$i]["d2"]=$ligne['date_fin'];
+        $tab[$i]["id"]=$ligne['id'];
+        $i++;
+    }
+    for($i=0;$i<$nb;$i++){
+        $d1 = $datedebut>$tab[$i]["d1"] ? $datedebut : $tab[$i]["d1"];
+         $d2 = $datefin<$tab[$i]["d2"] ? $datefin : $tab[$i]["d2"];
+        $sum = $sum + nombreJour($d1,$d2);
+    }
+
+    return $sum;
+}
+
+/* TODO */
+function getNombreHeurJourFerie($currentMonth,$year,$month){
+    $nbrJour =0;
+    if($currentMonth==1){
+        $nbrJour = 1;
+    }else if(!empty($year) && !empty($month)){
+        if($month==1){
+            $nbrJour = 2;
+        }
+        if($month==2){
+            $nbrJour = 0;
+        }
+        if($month==3){
+            $nbrJour = 0;
+        }
+    } else {
+            $nbrJour = 0;
+    }
+    return ($nbrJour*8);
 }
 ?>

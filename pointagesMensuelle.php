@@ -36,8 +36,11 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     <div class="controls">
                                         <select name="mois" class="form-control input-small-recherche" >
                                             <option></option>
-                                            <?php for ($i=1; $i <= 12; $i++) {?> 
-                                            <option value="<?php echo $i<10?"0".$i:$i; ?>"><?php echo $i ?></option>
+                                            <?php for ($i=1; $i <= 12; $i++) {
+                             $selected = isset($_REQUEST['mois']) && !empty($_REQUEST['mois']) && ($_REQUEST['mois']==$i || $_REQUEST['mois']=="0".$i) ? "selected=selected" : "";
+
+                                                ?> 
+                                            <option value="<?php echo $i<10?"0".$i:$i; ?>" <?php echo $selected ?>><?php echo $i<10?"0".$i:$i; ?></option>
                                             <?php } ?>
                                         </select>
                                     </div>
@@ -49,8 +52,10 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     <div class="controls">
                                         <select name="annee" class="form-control input-small-recherche" >
                                             <option></option>
-                                            <?php for ($i=2018; $i <= 2030; $i++) {?> 
-                                            <option value="<?php echo $i ?>"><?php echo $i ?></option>
+                                            <?php for ($i=2018; $i <= 2030; $i++) {
+                                         $selected2 = isset($_REQUEST['annee']) && !empty($_REQUEST['annee']) && ($_REQUEST['annee']==$i || $_REQUEST['annee']=="0".$i) ? "selected=selected" : "";
+                                            ?> 
+                                            <option value="<?php echo $i ?>" " <?php echo $selected2 ?>><?php echo $i ?></option>
                                             <?php } ?>
                                         </select>
                                     </div>
@@ -89,18 +94,17 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $where1 .= " and id_personnels in (select ID from users where  nom like '%" . $_POST['txtrechercher'] . "%' or login like '%" . $_POST['txtrechercher'] . "%') ";
 
                         if (isset($_POST['mois']) && !empty($_REQUEST['mois']) && isset($_POST['annee']) && !empty($_REQUEST['annee']))
+                        {
+                            $dateToShow = $_POST['mois']."-".$_POST['annee'];
                             $where1 .= " and date_pointage like '" . $_POST['annee']."-".$_POST['mois']."%'";
-
+                        }
 
                         if ((isset($_POST['moisCourant']) && !empty($_REQUEST['moisCourant']) ) || empty($where1)){
-                            $dateToShow = date("M-Y");
+                            $dateToShow = date("m-Y");
                             $where1 .= " and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
                         }
-                        echo $sql = "SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime
-                        FROM pointages
-                        WHERE 1=1 " . $where1 . " 
-                        GROUP BY id_personnels
-                        LIMIT 0 , 30";
+                        $sql = "select u.id as userId,u.nom ,p.id_personnels,p.sumTime from users u left join (SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime FROM pointages   WHERE 1=1 " . $where1 . " GROUP BY id_personnels) as p on u.id = p.id_personnels";
+                        
                         $res = doQuery($sql);
 
                         $nb = mysql_num_rows($res);
@@ -113,9 +117,9 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     <th>Nom</th>
                                     <th>Date</th>
                                     <th>Heurs travailler</th>
-                                    <th>Rapport mois actuelle</th>
+                                    <th>Conges / Retard</th>
+                                    <th>Rapport mensuelle</th>
                                     <th>Somme des Rapport</th>
-                                    <th class="op"> <?php echo _OP ?> </th>
                                 </thead>	
                                 <tbody>
                                     <?php
@@ -126,33 +130,35 @@ $_SESSION['breadcrumb_nav4'] = "";
                                             $c = "c";
                                         else
                                             $c = "";
+                                        $moisCourant = isset($_REQUEST['moisCourant']) && !empty($_REQUEST['moisCourant']) ? $_REQUEST['moisCourant'] : "";
+                                        $annee = isset($_REQUEST['annee']) && !empty($_REQUEST['annee']) ? $_REQUEST['annee'] : "";
+                                        $mois = isset($_REQUEST['mois']) && !empty($_REQUEST['mois']) ? $_REQUEST['mois'] : "";
+                                        $nbrConge = getNombreJourConge($ligne['userId'],$moisCourant,$annee,$mois);
+                                        $rapportMensuelle = getRapportMoisActuelle($ligne['userId'],$moisCourant,$annee,$mois,$ligne['sumTime']);
+                                        $rapport = getRapport($ligne['userId']);
+                                        $styleTd1="";
+                                        $styleTd2="";
+                                        $pos1 = strpos($rapportMensuelle, "-")>-1?true:false;
+                                        $pos2 = strpos($rapport, "-")>-1?true:false;                                        
+                                        if($pos1){
+                                            $styleTd1 = "background: red;color: white;font-weight: bold;";
+                                        } else {
+                                            if($rapportMensuelle!=0) {
+                                                $styleTd1 = "background: green;color: white;font-weight: bold;";
+                                            }
+                                        }
+                                        if($pos2){
+                                            $styleTd2 = "background: red;color: white;font-weight: bold;";
+                                        }
                                         ?>
                                         <tr class="<?php echo $c ?>">
-                                            <td><?php echo getValeurChamp('nom', 'users', 'ID', $ligne['id_personnels'])  ?></td>
+                                            <td><?php echo getValeurChamp('nom', 'users', 'id', $ligne['userId'])  ?></td>
                                             <td><?php echo $dateToShow;  ?></td>
-                                            <td><?php echo $ligne['sumTime'] ?></td>
-                                            <td><?php echo getRapportMoisActuelle($ligne['id_personnels'],$_REQUEST['moisCourant'],$_POST['annee'],$_POST['mois']) ?></td>
-                                            <td><?php // echo ?></td>
-                                            <td class="op">
-                                                &nbsp;
-                                                <a href="modifier_pointage.php?pointages=<?php echo $ligne['id'] ?>" class="modifier2" title="<?php echo _MODIFIER ?>">
-                                                    <i class="glyphicon glyphicon-edit"></i> 
-                                                </a>
-                                                &nbsp;
-
-                                                <a href="#ancre" 
-                                                   class="supprimer2" 
-                                                   onclick="javascript:supprimer(
-                                                                           'pointages',
-                                                                           '<?php echo $ligne['id'] ?>',
-                                                                           'pointages.php',
-                                                                           '1',
-                                                                           '1')
-                                                   " 
-                                                   title="<?php echo _SUPPRIMER ?>">
-
-                                                    <i class="glyphicon glyphicon-remove"></i> 
-                                                </a>
+                                            <td><?php echo empty($ligne['sumTime']) ? "0" : $ligne['sumTime']  ?></td>
+                                            <td><?php echo $nbrConge;  ?></td>
+                                            <td style="<?php echo $styleTd1; ?>"><?php echo $rapportMensuelle; ?></td>
+                                            <td style="<?php echo $styleTd2; ?>"><?php echo $rapport; ?></td>
+                                            
 
                                             </td>
                                         </tr>

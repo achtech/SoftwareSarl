@@ -24,7 +24,7 @@
                 </ul>
             </li>
             <li>
-                <a href="#"><i class="glyphicon glyphicon-wrench"></i> Postes <span class="fa arrow"></span></a>
+                <a href="#"><i class="glyphicon glyphicon-wrench"></i> Parametres <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">
                     <li>
                         <a href="postes.php" >
@@ -34,6 +34,16 @@
                     <li>
                         <a href="ajouter_poste.php" >
                             <i class="fa fa-plus-circle"></i> &nbsp;<?php echo _AJOUTER ?> un poste
+                        </a>
+                    </li>
+                    <li>
+                        <a href="postes.php" >
+                            <i class="glyphicon glyphicon-list-alt"></i> Liste des jours feries
+                        </a>
+                    </li>
+                    <li>
+                        <a href="ajouter_poste.php" >
+                            <i class="fa fa-plus-circle"></i> &nbsp;<?php echo _AJOUTER ?> un jour ferie
                         </a>
                     </li>
                 </ul>
