@@ -107,7 +107,11 @@
                         </a>
                     </li>
                 </ul></a>
-            </li>                    
+            </li>
+                        <li>
+                <a href="documents.php"><i class="glyphicon glyphicon-calendar"></i> Papier administratif</a>
+            </li>
+                    
             <li>
                 <a href="deconnexion.php"><i class="fa fa-sign-out fa-fw"></i> Deconnexion</a>
             </li>
