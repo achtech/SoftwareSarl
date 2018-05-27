@@ -37,12 +37,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="postes.php" >
+                        <a href="freeDays.php" >
                             <i class="glyphicon glyphicon-list-alt"></i> Liste des jours feries
                         </a>
                     </li>
                     <li>
-                        <a href="ajouter_poste.php" >
+                        <a href="ajouter_freeDays.php" >
                             <i class="fa fa-plus-circle"></i> &nbsp;<?php echo _AJOUTER ?> un jour ferie
                         </a>
                     </li>
@@ -84,6 +84,11 @@
                     <li>
                         <a href="ajouter_conge.php" >
                             <i class="fa fa-plus-circle"></i> &nbsp;<?php echo _AJOUTER ?> conge
+                        </a>
+                    </li>
+                    <li>
+                        <a href="loi_des_conges.php" >
+                            <i class="glyphicon glyphicon-calendar"></i> &nbsp;Loi des  conges
                         </a>
                     </li>
                 </ul>

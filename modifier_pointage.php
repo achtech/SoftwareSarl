@@ -55,11 +55,12 @@ $_SESSION['breadcrumb_nav4'] = "";
                                        name="m_start"  class="form-control input-small"/>
                             </div>
                         </div>
+                    
                         <div class="form-group">
-                            <label class="control-label"><?php echo "Soir : Heur d'entr&eacute;e" ?> : </label>
+                            <label class="control-label"><?php echo "Matin : Heur de sortie" ?> : </label>
                             <div class="controls">
-                                <input type="time" id="<?php echo "s_start" ?>_required"  value="<?php echo getValeurChamp('s_start', 'pointages', 'id', $_REQUEST['pointages']); ?>"
-                                       name="s_start"  class="form-control input-small"/>
+                                <input type="time" id="<?php echo "m_end" ?>_required"  value="<?php echo getValeurChamp('m_end', 'pointages', 'id', $_REQUEST['pointages']); ?>"
+                                       name="m_end"  class="form-control input-small" />
                             </div>
                         </div>
                             </div>
@@ -70,17 +71,17 @@ $_SESSION['breadcrumb_nav4'] = "";
             <div class="panel panel-default">
                 <div class="panel-body">
                         <div class="form-group">
+                            <label class="control-label"><?php echo "Soir : Heur d'entr&eacute;e" ?> : </label>
+                            <div class="controls">
+                                <input type="time" id="<?php echo "s_start" ?>_required"  value="<?php echo getValeurChamp('s_start', 'pointages', 'id', $_REQUEST['pointages']); ?>"
+                                       name="s_start"  class="form-control input-small"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="control-label"><?php echo "Soir : Heur de sortie" ?> : </label>
                             <div class="controls">
                                 <input type="time" id="<?php echo "s_end" ?>_required"  value="<?php echo getValeurChamp('s_end', 'pointages', 'id', $_REQUEST['pointages']); ?>"
                                        name="s_end"  class="form-control input-small" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label"><?php echo "Matin : Heur de sortie" ?> : </label>
-                            <div class="controls">
-                                <input type="time" id="<?php echo "m_end" ?>_required"  value="<?php echo getValeurChamp('m_end', 'pointages', 'id', $_REQUEST['pointages']); ?>"
-                                       name="m_end"  class="form-control input-small" />
                             </div>
                         </div>
             </div>

@@ -88,7 +88,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $where1 .= " and date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
 
 
-                        $sql = "select id,id_personnels,date_debut,date_fin from conges where 1=1 " . $where1 . " order by id desc";
+                        $sql = "select id,Libelle,id_personnels,date_debut,date_fin,nbrJour from conges where 1=1 " . $where1 . " order by id desc";
                         $res = doQuery($sql);
 
                         $nb = mysql_num_rows($res);
@@ -99,8 +99,10 @@ $_SESSION['breadcrumb_nav4'] = "";
                             <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                                 <thead>
                                 <th>Nom</th>
+                                <th>Libelle</th>
                                 <th>Date Debut</th>
                                 <th>Date Fin</th>
+                                <th>Nbr Jour</th>
                                 <th>Nombre de jour</th>
                                 <th class="op"> <?php echo _OP ?> </th>
                                 </thead>	
@@ -116,8 +118,10 @@ $_SESSION['breadcrumb_nav4'] = "";
                                         ?>
                                         <tr class="<?php echo $c ?>">
                                             <td><?php echo getValeurChamp('nom', 'users', 'id', $ligne['id_personnels'])  ?></td>
+                                            <td><?php echo $ligne['Libelle'] ?></td>
                                             <td><?php echo $ligne['date_debut'] ?></td>
                                             <td><?php echo $ligne['date_fin'] ?></td>
+                                            <td><?php echo $ligne['nbrJour'] ?></td>
                                             <td><?php echo nombreJour($ligne['date_debut'],$ligne['date_fin']) ?></td>
                                             <td class="op">
                                                 &nbsp;

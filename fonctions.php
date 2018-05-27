@@ -1132,18 +1132,7 @@ function no_accent($str_accent) {
 
 /* * ******************************** GESTION DES PERSONNEL ********************************* */
 
-function getSommeNombreHeurN($where) {
-  $sql = "SELECT SEC_TO_TIME( SUM( extract(hour from s.total) * 60 * 60+ extract(minute from s.total) * 60 + extract(second from s.total) ) )  as tot
-FROM (SELECT ADDTIME( TIMEDIFF( m_end, m_start ) , TIMEDIFF( s_end, s_start ) ) AS total
-FROM pointages where 1=1  ".$where." ) AS s";
-    $res = doQuery($sql);
-    $nbrHeur = 0;
-    while ($ligne = mysql_fetch_array($res)) {
-         $nbrHeur=$ligne['tot'];
 
-    }
-    return $nbrHeur;
-}
 
 /* TODO : calculer la some des credit : cette fonction est just copie de avance */
 
@@ -1221,7 +1210,6 @@ function importerDatabase($file) {
     } else {
         $m = 'Database Successfully Imported';
     }
-    echo $m;
     redirect("database.php?m=" . $m);
     return $m;
 }
@@ -1242,30 +1230,6 @@ function getIdChantier($personnels, $idChantier, $idMarche) {
         return $id;
     }
     return "";
-}
-
-function getPaiementsData($start,$end,$sql){
-    $res = doQuery($sql);
-    $nb = mysql_num_rows($res);
-    $tab = array();
-    $i=0;
-    while ($ligne = mysql_fetch_array($res)) {
-        $tab[$i][0]=$ligne['CODE'];
-        $tab[$i][1]=$ligne['PRENOM']." ".$ligne['NOM'];
-        $tab[$i][2]=getSommeHeurN($ligne['id'], $start,$end);
-        $tab[$i][3]=getSommeHeurS($ligne['id'], $start,$end);
-        $tab[$i][4]=$ligne['TYPE']=="Salarie"?$ligne['SALAIRE_MENSUELLE']:$ligne['TARIF_JOURNALIERS'];
-        $tab[$i][5]=getMontant($ligne['id'], $start,$end);
-        $tab[$i][6]=getSommeAvance($ligne['id'], $start,$end);
-        $tab[$i][7]=getSommeCredit($ligne['id'], $start,$end);
-        $tab[$i][8]=getNetAPayer($ligne['id'], $start,$end);
-        $i++;
-    }
-    return $tab;
-}
-
-function genererFichPaiement($start,$end,$datePaiement,$sql){
-    redirect("printPaiement.php?start=".$start."&end=".$end."&datePaiement=".$datePaiement."&sql=".$sql);
 }
 
 
@@ -1304,6 +1268,10 @@ function getNombreHeur($currentMonth,$year,$month){
     }else if(!empty($year) && !empty($month)){
         $datedebut = date('Y-m-d',strtotime($year."-".$month."-01"));
         $datefin = date('Y-m-t',strtotime($year."-".$month."-20"));
+        if(date('Y-m')==$year."-".$month){
+            $datefin= date('Y-m-d');
+        }
+
         $nbrJour = nombreJour($datedebut,$datefin);
     } else {
         $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
@@ -1313,15 +1281,20 @@ function getNombreHeur($currentMonth,$year,$month){
     return ($nbrJour*8);
 }
 
-function getRapportMoisActuelle($user,$currentMonth,$year,$month,$time){
+function getRapportMensuelle($user,$currentMonth,$year,$month,$time){
     if(!empty($user)) {
         $nbrHeur = getNombreHeur($currentMonth,$year,$month);
         $conge = getNombreJourConge($user,$currentMonth,$year,$month)*8;
-        $jourFerie = getNombreHeurJourFerie($currentMonth,$year,$month);
+        $jourFerie = getNombreHeurJourFerie($currentMonth,$year,$month,false);
         $tabH= explode(":", $time);
         if(count($tabH)==3){
             $h = (int)$tabH[0]+(int)$conge+(int)$jourFerie-$nbrHeur;
-            return $h.":$tabH[1]:$tabH[2]";            
+            $m = (int) $tabH[1];
+            if($h<0) {
+                $h=$h+1;
+                $m = 60-$m;
+            }
+            return $h.":".$m.":00";            
         }else
             return 0;
     } else {
@@ -1354,42 +1327,95 @@ function getSumHours($datefin,$datedebut,$user){
 }
 
 
-function getRapport($user){
+function getRapport($user,$currentMonth,$year,$month){
     if(!empty($user)) {
         // get first date for the selected user (select min date from pointage)
         $minDate = getMinDate($user);
         // get the current date
         $currentDate = date("Y-m-d");
-        // get number of days
-        $nbJour = nombreJour($minDate,$currentDate);
-        // get sum of worked hours
-        $sumDate = getSumHours($currentDate,$minDate,$user);
-        // calculate the report
-        $tabH= explode(":", $sumDate);
+
+        //number of days in Hours 
+        $nb=nombreJour($minDate, $currentDate);
+        $SumHoursBetweenMinDateAndCurrentDate = $nb*8;
+
+        //sumOfWorkedHours 
+        $sumOfWorkedHours = getSumHours($currentDate,$minDate,$user);
+
+        // Sum of free days in Hours
+        $sumOffreeDays = getNombreHeurJourFerie($currentMonth,$year,$month,true);
+
+        // Sum of Holidays in Hours
+        $sumOfHolidays = getNombreJourCongeTotal($user,$year)*8;
+
+        // calulcte the result workedHours+freeDays+holidays - numberOfDaysIn hours
+        $tabH= explode(":", $sumOfWorkedHours);
+
         if(count($tabH)==3){
-            return ((int)$tabH[0]-($nbJour*8)).":$tabH[1]:$tabH[2]";
-        }else{
+             $h = (int)$tabH[0]+(int)$sumOfHolidays+(int)$sumOffreeDays-(int)$SumHoursBetweenMinDateAndCurrentDate;
+              $m = (int) $tabH[1];
+             if($h<0) {
+                $h=$h+1;
+                $m = 60-$m;
+            }
+            return $h.":".$m.":00";                
+        }else
             return 0;
-        }
     }
     else {
         return 0;
     }
 }
 
+
+function getNombreJourCongeTotal($user,$year){
+    $sum = 0;
+    if(empty($year)){        
+        $year = date("Y");
+    }
+    $datedebut = date('Y-m-d',strtotime($year."-01-01"));
+    $datefin= date('Y-m-d');        
+    $sql = "SELECT * FROM conges WHERE id_personnels=".$user." 
+    and ( date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
+     or date_fin between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
+     or date_debut > DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and date_fin < DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
+     or date_debut < DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and date_fin > DATE_FORMAT('" . $datefin. "', '%Y-%m-%d'))";
+    $res = doQuery($sql);
+    $tab = array();
+    $nb = mysql_num_rows($res);
+
+    $i=0;
+    while ($ligne = mysql_fetch_array($res)) {
+        $tab[$i]["d1"]=$ligne['date_debut'];
+        $tab[$i]["d2"]=$ligne['date_fin'];
+        $tab[$i]["id"]=$ligne['id'];
+        $i++;
+    }
+
+    for($i=0;$i<$nb;$i++){
+        $d1 = $datedebut>$tab[$i]["d1"] ? $datedebut : $tab[$i]["d1"];
+         $d2 = $datefin<$tab[$i]["d2"] ? $datefin : $tab[$i]["d2"];
+        $sum = $sum + nombreJour($d1,$d2);
+    }
+
+    return $sum;
+}
+
 function getNombreJourConge($user,$currentMonth,$year,$month){
-    
+     
     $sum = 0;
     if(!empty($currentMonth) || !empty($year) || !empty($month) ){
         
             $datedebut = !empty($currentMonth) ? date('Y-m-d',strtotime('first day of this month', time())) : $year."-".$month."-01";
            //TODO VERIFY LAST DAY IN SELECTED MONTH
-            $datefin = !empty($currentMonth) ? date('Y-m-d',strtotime('last day of this month', time())) : $year."-".$month."-31";;
+            $datefin = !empty($currentMonth) ? date('Y-m-d',strtotime('last day of this month', time())) : date('Y-m-t',strtotime($year."-".$month."-05"));
+            if(date('Y-m')==$year."-".$month){
+                $datefin= date('Y-m-d');
+            }
     }else{
         $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
         $datefin = date('Y-m-d');        
     }
-     $sql = "SELECT * FROM conges WHERE id_personnels=".$user." 
+    $sql = "SELECT * FROM conges WHERE id_personnels=".$user." 
     and ( date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
      or date_fin between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
      or date_debut > DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and date_fin < DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
@@ -1414,12 +1440,13 @@ function getNombreJourConge($user,$currentMonth,$year,$month){
     return $sum;
 }
 
-/* TODO */
-function getNombreHeurJourFerie($currentMonth,$year,$month){
+/* TODO  check years*/
+function getNombreHeurJourFerie($currentMonth,$year,$month,$global){
+    if ($global) {
+        return 16;
+    }
     $nbrJour =0;
-    if($currentMonth==1){
-        $nbrJour = 1;
-    }else if(!empty($year) && !empty($month)){
+    if(!empty($year) && !empty($month)){
         if($month==1){
             $nbrJour = 2;
         }
@@ -1430,8 +1457,119 @@ function getNombreHeurJourFerie($currentMonth,$year,$month){
             $nbrJour = 0;
         }
     } else {
-            $nbrJour = 0;
+            $nbrJour = 1;
     }
     return ($nbrJour*8);
 }
+
+
+function nombreJourPerUser($user,$currentMonth,$year,$month){
+    if($user){
+        if(!empty($currentMonth) || !empty($year) || !empty($month) ){
+            
+                $datedebut = !empty($currentMonth) ? date('Y-m-d',strtotime('first day of this month', time())) : $year."-".$month."-01";
+               //TODO VERIFY LAST DAY IN SELECTED MONTH
+
+                $datefin = !empty($currentMonth) ? date('Y-m-d') : date('Y-m-t',strtotime($year.'-'.$month.'-04'));
+                if(date('Y-m')==$year."-".$month){
+                    $datefin= date('Y-m-d');
+                }
+        }else{
+            $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
+            $datefin = date('Y-m-d');        
+        }
+
+        $sql = "SELECT count(id) as total FROM pointages WHERE id_personnels=".$user." and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
+        $res = doQuery($sql);
+        $tab = array();
+        $nb = mysql_num_rows($res);
+        $resultat = 0;
+        $i=0;
+        while ($ligne = mysql_fetch_array($res)) {
+            $resultat=$ligne['total'];
+        }
+        return (int) $resultat;
+    }
+}
+function getSommeNombreHeurN($where) {
+  $sql = "SELECT SEC_TO_TIME( SUM( extract(hour from s.total) * 60 * 60+ extract(minute from s.total) * 60 + extract(second from s.total) ) )  as tot
+FROM (SELECT ADDTIME( TIMEDIFF( m_end, m_start ) , TIMEDIFF( s_end, s_start ) ) AS total
+FROM pointages where 1=1  ".$where." ) AS s";
+    $res = doQuery($sql);
+    $nbrHeur = 0;
+    while ($ligne = mysql_fetch_array($res)) {
+         $nbrHeur=$ligne['tot'];
+
+    }
+    return $nbrHeur;
+}
+
+function nombreJour2($currentMonth,$year,$month){
+        if(!empty($currentMonth) || !empty($year) || !empty($month) ){
+            
+                $datedebut = !empty($currentMonth) ? date('Y-m-d',strtotime('first day of this month', time())) : $year."-".$month."-01";
+
+                $datefin = !empty($currentMonth) ? date('Y-m-d') : date('Y-m-t',strtotime($year.'-'.$month.'-04'));
+                if(date('Y-m')==$year."-".$month){
+                    $datefin= date('Y-m-d');
+                }
+        }else{
+            $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
+            $datefin = date('Y-m-d');        
+        }
+        return nombreJour($datedebut,$datefin);
+}
+
+function getHolidaysByYears($year){
+    $months = array('JAN','FEB','MAI','APR','MAR','JUN','JUL','AUG','SEP','OCT','NEV','DEC');
+    $sql = "SELECT users.id as userId, MONTH( conges.date_debut ) as m , SUM( nbrJour ) AS total ".
+                                " FROM conges, users".
+                                " WHERE users.id = conges.id_personnels and YEAR( conges.date_debut )='".$year."'".
+                                " GROUP BY id_personnels, MONTH( conges.date_debut )";
+                        
+    $res = doQuery($sql);
+    $nb = mysql_num_rows($res);
+    $tab = array();
+    if ($nb == 0) {
+        echo array();
+    } else {
+        $i = 0;
+        while ($ligne = mysql_fetch_array($res)) {
+            if ($i % 2 == 0)
+                $c = "c";
+            else
+                $c = "";
+            $tab[$ligne['userId'].'_'.$ligne['m']] = $ligne['total'];
+
+        }
+    }             
+    return  $tab;    
+}
+
+function getSumHolidaysByYearPerUser($userId, $year) {
+    $sql = "SELECT SUM(TO_DAYS( date_fin ) - TO_DAYS( date_debut )) AS tot  ".
+                                " FROM conges".
+                                " WHERE id_personnels =".$userId." and YEAR( conges.date_debut )=".$year;
+                        
+    $res = doQuery($sql);
+    $nb = mysql_num_rows($res);
+    while ($ligne = mysql_fetch_array($res)) {
+        $res = $ligne['tot'];
+    }
+    return  $res;   
+}
+
+function getSumCreditByYearPerUser($userId, $year){
+    $firstYear = explode("-", getValeurChamp('date_contrat', 'users', 'id', $userId))[0];
+    $nbCongeThisYear = getSumHolidaysByYearPerUser($userId, $year);
+    $nbCongeLastYear = getSumHolidaysByYearPerUser($userId, $year-1);
+    if($year < $firstYear){
+        return "-";
+    } else if($year == $firstYear){
+            return 18-$nbCongeThisYear;
+    } else {
+            return 36-($nbCongeThisYear + $nbCongeLastYear);
+    }
+}
+
 ?>

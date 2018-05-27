@@ -26,12 +26,17 @@ $_SESSION['breadcrumb_nav3'] = "Nouveau conge";
                                 <input type="hidden" name="table" value="conges"/>
                                 <input type="hidden" name="page" value="conges.php"/>
                                 
-                                <input type="hidden" name="id_noms_retour" value="conges"/>
-                                <input type="hidden" name="id_valeurs_retour" value="<?php echo $_REQUEST['conges'] ?>"/>	
-
                                 <div class="form-group">
                                     <label class="control-label">Salarie : </label>
                                     <?php echo getTableList('users', 'id_personnels', "", 'nom', "", "", "") ?>
+                                </div>
+
+                                 <div class="form-group">
+                                    <label class="control-label"><?php echo "Libelle :" ?>  </label>
+                                    <div class="controls">
+                                        <input type="text" id="<?php echo "Libelle" ?>__required" 
+                                               name="Libelle"  class="form-control input-small"/>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -46,11 +51,19 @@ $_SESSION['breadcrumb_nav3'] = "Nouveau conge";
                                            name="date_fin"  class="form-control"/>
                                 </div>
 
+                                 <div class="form-group">
+                                    <label class="control-label"><?php echo "Nombre de jour :" ?>  </label>
+                                    <div class="controls">
+                                        <input type="text" id="<?php echo "nbrJour" ?>__required" 
+                                               name="nbrJour"  class="form-control input-small"/>
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-default">
                                         <?php echo _AJOUTER ?>
                                     </button>
-                                    ou <a class="text-danger" href="chantiers.php?marches=<?php echo $_REQUEST['marches'] ?>">Annuler</a>
+                                    ou <a class="text-danger" href="conges.php">Annuler</a>
 
                                 </div>
                             </form>

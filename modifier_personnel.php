@@ -41,6 +41,15 @@ $_SESSION['breadcrumb_nav4'] = "";
                             <input type="text" id="<?php echo "login" ?>_required"  value="<?php echo getValeurChamp('login', 'users', 'id', $_REQUEST['users']); ?>"
                                    name="login"  class="form-control input-small"/>
                         </div>						
+
+                        <div class="form-group">
+                            <label class="control-label">Date d'embauche : </label>
+                            <div class="controls">
+                                <input type="date" id="cal__required" value="<?php echo getValeurChamp('date_contrat', 'users', 'id', $_REQUEST['users']); ?>"
+                                       name="date_contrat"  class="form-control input-small"/>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label class="control-label"><?php echo "Type" ?> : </label>
                             <?php

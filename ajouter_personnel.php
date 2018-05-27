@@ -54,6 +54,14 @@ $_SESSION['link_nav3'] = "ajouter_personnel.php";
                                 </select>
                             </div> 
                         </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Date d'embauche : </label>
+                            <div class="controls">
+                                <input type="date" id="cal__required" 
+                                       name="date_contrat"  class="form-control input-small"/>
+                            </div>
+                        </div>
                         <div class="form-actions">
                             <input type="submit" class="btn btn-primary" value="<?php echo _AJOUTER ?>" /> ou <a class="text-danger" href="personnels.php">Annuler</a>
                         </div>

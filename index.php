@@ -41,9 +41,9 @@ $_SESSION['breadcrumb_nav4'] = "";
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-body easypiechart-panel">
-                    <h4><a href="postes.php">Postes</a></h4>
+                    <h4><a href="pointagesMensuelle.php">Report</a></h4>
                     <div class="easypiechart" id="easypiechart-teal" data-percent="84" >                                
-                        <a href="postes.php"><img src="images/ouvrier-du-batiment-96.png" alt="Postes" title="Postes" /></a>
+                        <a href="pointagesMensuelle.php"><img src="images/ouvrier-du-batiment-96.png" alt="Report" title="Report" /></a>
 
                     </div>
                 </div>
@@ -86,6 +86,50 @@ $_SESSION['breadcrumb_nav4'] = "";
             </div>
         </div>
     </div><!--/.row-->
+    <div class="row">
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                    TODO : 
+                    <ul>
+                        <li>implement free days table and pages</li>
+                        <li> implement function getNombreHeurJourFerie($currentMonth,$year,$month,$global)</li>
+                        <li>implement function getNombreJourConge($user,$currentMonth,$year,$month) TODO PART</li>
+                        <li>chnage icon report in index and check permission</li>
+                        <li>Photo in profil</li>
+                        <li>Ordre du menu</li>
+                        <li>Gestion des documents</li>
+                        
+                    </ul>             
+            </div>
+        </div>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                    Fill DATA BASE : Pointages 
+                    <ol>
+                        <li>Achraf <b>Done</b></li>
+                        <li>Noura<b>En cours</b></li>
+                        <li>Bihi</li>
+                        <li>Hamza</li>
+                        <li>Saad</li>
+                        <li>Simo</li>
+                        <li>Abdelah<b>Done</b></li>
+                    </ol>
+                    </div>
+        </div>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                    Fill DATA BASE : Conge 
+                    <ol>
+                        <li>Achraf <b>Done</b></li>
+                        <li>Noura<b>En cours</b></li>
+                        <li>Bihi</li>
+                        <li>Hamza</li>
+                        <li>Saad</li>
+                        <li>Simo</li>
+                        <li>Abdelah<b>Done</b></li>
+                    </ol>
+                    </div>
+        </div>
 </div>
 
 <?php require_once('foot.php'); ?>

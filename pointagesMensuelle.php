@@ -90,23 +90,30 @@ $_SESSION['breadcrumb_nav4'] = "";
                         $dateToShow ="";
                         $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
                         $datefin = date('Y-m-d',strtotime('last day of this month', time()));
-                        if (isset($_POST['txtrechercher']) && !empty($_REQUEST['txtrechercher']))
-                            $where1 .= " and id_personnels in (select ID from users where  nom like '%" . $_POST['txtrechercher'] . "%' or login like '%" . $_POST['txtrechercher'] . "%') ";
+                        if (isset($_REQUEST['txtrechercher']) && !empty($_REQUEST['txtrechercher']))
+                            $where1 .= " and id_personnels in (select ID from users where  nom like '%" . $_REQUEST['txtrechercher'] . "%' or login like '%" . $_REQUEST['txtrechercher'] . "%') ";
 
-                        if (isset($_POST['mois']) && !empty($_REQUEST['mois']) && isset($_POST['annee']) && !empty($_REQUEST['annee']))
+                        if (isset($_REQUEST['mois']) && !empty($_REQUEST['mois']) && isset($_REQUEST['annee']) && !empty($_REQUEST['annee']))
                         {
-                            $dateToShow = $_POST['mois']."-".$_POST['annee'];
-                            $where1 .= " and date_pointage like '" . $_POST['annee']."-".$_POST['mois']."%'";
+                            $dateToShow = $_REQUEST['mois']."-".$_REQUEST['annee'];
+                            $datedebut = $_REQUEST['annee']."-".$_REQUEST['mois']."-01";
+                            $datefin = $_REQUEST['annee']."-".$_REQUEST['mois']."-01";
+                            if(date('Y-m')==$_REQUEST['annee']."-".$_REQUEST['mois']){
+                                $datefin= date('Y-m-d');
+                            }else{
+                                $datefin= date('Y-m-t',strtotime($_REQUEST['annee']."-".$_REQUEST['mois']."-04"));
+                            }
+
+                            $where1 .= " and date_pointage between '".$datedebut."' and '".$datefin."' ";
                         }
 
-                        if ((isset($_POST['moisCourant']) && !empty($_REQUEST['moisCourant']) ) || empty($where1)){
+                        if ((isset($_REQUEST['moisCourant']) && !empty($_REQUEST['moisCourant']) ) || empty($where1)){
                             $dateToShow = date("m-Y");
                             $where1 .= " and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
                         }
                         $sql = "select u.id as userId,u.nom ,p.id_personnels,p.sumTime from users u left join (SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime FROM pointages   WHERE 1=1 " . $where1 . " GROUP BY id_personnels) as p on u.id = p.id_personnels";
                         
                         $res = doQuery($sql);
-
                         $nb = mysql_num_rows($res);
                         if ($nb == 0) {
                             echo _VIDE;
@@ -117,6 +124,8 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     <th>Nom</th>
                                     <th>Date</th>
                                     <th>Heurs travailler</th>
+                                    <th>Nombre de jour</th>
+                                    <th>Jour libre</th>
                                     <th>Conges / Retard</th>
                                     <th>Rapport mensuelle</th>
                                     <th>Somme des Rapport</th>
@@ -125,7 +134,6 @@ $_SESSION['breadcrumb_nav4'] = "";
                                     <?php
                                     $i = 0;
                                     while ($ligne = mysql_fetch_array($res)) {
-
                                         if ($i % 2 == 0)
                                             $c = "c";
                                         else
@@ -134,8 +142,11 @@ $_SESSION['breadcrumb_nav4'] = "";
                                         $annee = isset($_REQUEST['annee']) && !empty($_REQUEST['annee']) ? $_REQUEST['annee'] : "";
                                         $mois = isset($_REQUEST['mois']) && !empty($_REQUEST['mois']) ? $_REQUEST['mois'] : "";
                                         $nbrConge = getNombreJourConge($ligne['userId'],$moisCourant,$annee,$mois);
-                                        $rapportMensuelle = getRapportMoisActuelle($ligne['userId'],$moisCourant,$annee,$mois,$ligne['sumTime']);
-                                        $rapport = getRapport($ligne['userId']);
+                                        $rapportMensuelle = getRapportMensuelle($ligne['userId'],$moisCourant,$annee,$mois,$ligne['sumTime']);
+                                        $rapport = getRapport($ligne['userId'],$moisCourant,$annee,$mois);
+                                        $nbrJour = nombreJour2($moisCourant,$annee,$mois);
+                                        $freedays = getNombreHeurJourFerie($moisCourant,$annee,$mois,false)/8;
+                                        $nbrHours = ($nbrJour*8).":00:00";                                        
                                         $styleTd1="";
                                         $styleTd2="";
                                         $pos1 = strpos($rapportMensuelle, "-")>-1?true:false;
@@ -154,7 +165,9 @@ $_SESSION['breadcrumb_nav4'] = "";
                                         <tr class="<?php echo $c ?>">
                                             <td><?php echo getValeurChamp('nom', 'users', 'id', $ligne['userId'])  ?></td>
                                             <td><?php echo $dateToShow;  ?></td>
-                                            <td><?php echo empty($ligne['sumTime']) ? "0" : $ligne['sumTime']  ?></td>
+                                            <td><?php echo empty($ligne['sumTime']) ? "0" : $ligne['sumTime']  ?> / <?php echo $nbrHours ?></td>
+                                            <td><?php echo $nbrJour ?></td>
+                                            <td><?php echo $freedays ?></td>
                                             <td><?php echo $nbrConge;  ?></td>
                                             <td style="<?php echo $styleTd1; ?>"><?php echo $rapportMensuelle; ?></td>
                                             <td style="<?php echo $styleTd2; ?>"><?php echo $rapport; ?></td>

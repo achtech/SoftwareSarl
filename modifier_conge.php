@@ -38,6 +38,14 @@ $_SESSION['breadcrumb_nav3'] = "mise a jour du conge";
                                     <?php echo getTableList('users', 'id_personnels', getValeurChamp('id_personnels','conges','id',$_REQUEST['conges']), 'nom', "", "", "") ?>
                                 </div>
 
+                                 <div class="form-group">
+                                    <label class="control-label"><?php echo "Libelle :" ?>  </label>
+                                    <div class="controls">
+                                        <input type="text" id="<?php echo "Libelle" ?>__required" value="<?php echo getValeurChamp('Libelle','conges','id',$_REQUEST['conges']) ?>" 
+                                               name="Libelle"  class="form-control input-small"/>
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
                                     <label class="control-label"><?php echo "Date debut" ?> : </label>
                                     <input type="date" id="cal__required" value="<?php echo getValeurChamp('date_debut','conges','id',$_REQUEST['conges']) ?>" 
@@ -49,12 +57,19 @@ $_SESSION['breadcrumb_nav3'] = "mise a jour du conge";
                                     <input type="date" id="cal2__required" value="<?php echo getValeurChamp('date_fin','conges','id',$_REQUEST['conges']) ?>"
                                            name="date_fin"  class="form-control"/>
                                 </div>
+                                  <div class="form-group">
+                                    <label class="control-label"><?php echo "Nombre de jour :" ?>  </label>
+                                    <div class="controls">
+                                        <input type="text" id="<?php echo "nbrJour" ?>__required" value="<?php echo getValeurChamp('nbrJour','conges','id',$_REQUEST['conges']) ?>" 
+                                               name="nbrJour"  class="form-control input-small"/>
+                                    </div>
+                                </div>
 
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-default">
                                         <?php echo _MODIFIER ?>
                                     </button>
-                                    ou <a class="text-danger" href="chantiers.php?marches=<?php echo $_REQUEST['marches'] ?>">Annuler</a>
+                                    ou <a class="text-danger" href="conges.php">Annuler</a>
 
                                 </div>
                             </form>
