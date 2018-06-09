@@ -28,7 +28,13 @@ $_SESSION['breadcrumb_nav3'] = "Nouveau conge";
                                 
                                 <div class="form-group">
                                     <label class="control-label">Salarie : </label>
-                                    <?php echo getTableList('users', 'id_personnels', "", 'nom', "", "", "") ?>
+                                    <?php 
+                                        $whereUser = "";
+                                        if($_SESSION['role']!=1){
+                                            $whereUser = " where id=".$_SESSION['user'];   
+                                        }
+                                        echo getTableList('users', 'id_personnels', "", 'nom', "", $whereUser, "");
+                                    ?>
                                 </div>
 
                                  <div class="form-group">

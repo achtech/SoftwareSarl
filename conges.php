@@ -87,6 +87,9 @@ $_SESSION['breadcrumb_nav4'] = "";
                         if (isset($_POST['moisCourant']) && !empty($_REQUEST['moisCourant']))
                             $where1 .= " and date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
 
+                        if($_SESSION['role']!=1){
+                            $where1 .= " and id_personnels=".$_SESSION['user'];   
+                        }
 
                         $sql = "select id,Libelle,id_personnels,date_debut,date_fin,nbrJour from conges where 1=1 " . $where1 . " order by id desc";
                         $res = doQuery($sql);

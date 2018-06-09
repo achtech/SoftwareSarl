@@ -56,9 +56,12 @@ $_SESSION['link_nav3'] = "ajouter_pointage.php";
 
                     <div class="widget-content nopadding">
                         <?php
+                        $where="";
+                        if($_SESSION['role']!=1){
+                            $where = " where id=".$_SESSION['user'];   
+                        }
 
-
-                        $sql = "select * from users order by id";
+                        $sql = "select * from users ".$where." order by id";
                         $res = doQuery($sql);
 
                         $nb = mysql_num_rows($res);

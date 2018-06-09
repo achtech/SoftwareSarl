@@ -65,6 +65,10 @@ $_SESSION['breadcrumb_nav4'] = "";
                                             <?php $value=isset($_REQUEST['moisCourant']) ? "checked":"" ?>
                                             <input type="checkbox" name="moisCourant" <?php echo $value ?>  onchange="document.frm1.submit()"> Mois Courant
                                         </label>
+                                        <label class="control-label"></label>
+                                            <?php $value1=isset($_REQUEST['today']) ? "checked":"" ?>
+                                            <input type="checkbox" name="today" <?php echo $value1 ?>  onchange="document.frm1.submit()"> Aujourd'hui
+                                        </label>
                                     </div>
                                 </div>
 
@@ -82,6 +86,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                     <div class="table-responsive">
                         <?php
                         $where1 = "";
+                        $aujourdhui = date('Y-m-d');
                         $datedebut = date('Y-m-d',strtotime('first day of this month', time()));
                         $datefin = date('Y-m-d',strtotime('last day of this month', time()));
                         
@@ -98,6 +103,14 @@ $_SESSION['breadcrumb_nav4'] = "";
                         {
                             $where1 .= " and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
                         }    
+
+                        if (isset($_POST['today']) && !empty($_REQUEST['today']))
+                        {
+                            $where1 .= " and date_pointage = DATE_FORMAT('" . $aujourdhui . "', '%Y-%m-%d')";
+                        }    
+                        if($_SESSION['role']!=1){
+                            $where1 .= " and id_personnels=".$_SESSION['user'];   
+                        }
 
                         $sql = "select id,id_personnels,date_pointage,m_start,m_end,s_start,s_end,ADDTIME(TIMEDIFF(m_end, m_start),TIMEDIFF(s_end, s_start )) as d from pointages where 1=1 " . $where1 . " order by id desc";
                         $res = doQuery($sql);
@@ -121,8 +134,8 @@ $_SESSION['breadcrumb_nav4'] = "";
                             </table>
                             <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                                 <thead>
-                                <th>Nom</th>
                                 <th>Date</th>
+                                <th>Nom</th>
                                 <th>Entr&eacute; 1</th>
                                 <th>Sortie 1</th>
                                 <th>Entr&eacute; 2</th>
@@ -141,8 +154,8 @@ $_SESSION['breadcrumb_nav4'] = "";
                                             $c = "";
                                         ?>
                                         <tr class="<?php echo $c ?>">
-                                            <td><?php echo getValeurChamp('nom', 'users', 'ID', $ligne['id_personnels'])  ?></td>
                                             <td><?php echo $ligne['date_pointage'] ?></td>
+                                            <td><?php echo getValeurChamp('nom', 'users', 'ID', $ligne['id_personnels'])  ?></td>
                                             <td><?php echo $ligne['m_start'] ?></td>
                                             <td><?php echo $ligne['m_end'] ?></td>
                                             <td><?php echo $ligne['s_start'] ?></td>

@@ -1374,7 +1374,7 @@ function getNombreJourCongeTotal($user,$year){
     }
     $datedebut = date('Y-m-d',strtotime($year."-01-01"));
     $datefin= date('Y-m-d');        
-    $sql = "SELECT * FROM conges WHERE id_personnels=".$user." 
+    $sql = "SELECT * FROM conges WHERE id_personnels=".$user." and date_debut> DATE_FORMAT('2018-06-01', '%Y-%m-%d')
     and ( date_debut between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
      or date_fin between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
      or date_debut > DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and date_fin < DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')
@@ -1406,7 +1406,6 @@ function getNombreJourConge($user,$currentMonth,$year,$month){
     if(!empty($currentMonth) || !empty($year) || !empty($month) ){
         
             $datedebut = !empty($currentMonth) ? date('Y-m-d',strtotime('first day of this month', time())) : $year."-".$month."-01";
-           //TODO VERIFY LAST DAY IN SELECTED MONTH
             $datefin = !empty($currentMonth) ? date('Y-m-d',strtotime('last day of this month', time())) : date('Y-m-t',strtotime($year."-".$month."-05"));
             if(date('Y-m')==$year."-".$month){
                 $datefin= date('Y-m-d');
@@ -1442,24 +1441,27 @@ function getNombreJourConge($user,$currentMonth,$year,$month){
 
 /* TODO  check years*/
 function getNombreHeurJourFerie($currentMonth,$year,$month,$global){
+    
+    $where ="";
     if ($global) {
-        return 16;
-    }
-    $nbrJour =0;
-    if(!empty($year) && !empty($month)){
-        if($month==1){
-            $nbrJour = 2;
-        }
-        if($month==2){
-            $nbrJour = 0;
-        }
-        if($month==3){
-            $nbrJour = 0;
-        }
+        $where = " and extract(year from dateDebut) =".date("Y");
     } else {
-            $nbrJour = 1;
+        if(!empty($year) && !empty($month) ){
+            $where = " and extract(year from dateDebut) =".$year." and extract(month from dateDebut) ='".$month."'";
+        }elseif (!empty($currentMonth)) {
+            $where = " and extract(year from dateDebut) =".date("Y")." and extract(month from dateDebut) ='".date("m")."'";
+        }
     }
-    return ($nbrJour*8);
+    $req = "select SUM(TO_DAYS( datefin ) - TO_DAYS( datedebut )) AS tot  from freeDays where 1=1 ".$where;
+    $res = doQuery($req);
+    $tab = array();
+    $nb = mysql_num_rows($res);
+
+    $nbrJour =0;
+    while ($ligne = mysql_fetch_array($res)) {
+        $nbrJour=$ligne['tot'];
+    }
+    return $nbrJour*8 ;
 }
 
 

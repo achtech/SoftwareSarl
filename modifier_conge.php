@@ -35,7 +35,14 @@ $_SESSION['breadcrumb_nav3'] = "mise a jour du conge";
 
                                 <div class="form-group">
                                     <label class="control-label">Salarie : </label>
-                                    <?php echo getTableList('users', 'id_personnels', getValeurChamp('id_personnels','conges','id',$_REQUEST['conges']), 'nom', "", "", "") ?>
+
+                                <?php 
+                                $whereUser = "";
+                                if($_SESSION['role']!=1){
+                                    $whereUser = " where id=".$_SESSION['user'];   
+                                }
+
+                                    echo getTableList('users', 'id_personnels', getValeurChamp('id_personnels','conges','id',$_REQUEST['conges']), 'nom', "", $whereUser, "") ?>
                                 </div>
 
                                  <div class="form-group">

@@ -111,7 +111,12 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $dateToShow = date("m-Y");
                             $where1 .= " and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
                         }
-                        $sql = "select u.id as userId,u.nom ,p.id_personnels,p.sumTime from users u left join (SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime FROM pointages   WHERE 1=1 " . $where1 . " GROUP BY id_personnels) as p on u.id = p.id_personnels";
+                        $whereUser = "";
+                        if($_SESSION['role']!=1){
+                            $whereUser = " where u.id=".$_SESSION['user'];   
+                        }
+
+                        $sql = "select u.id as userId,u.nom ,p.id_personnels,p.sumTime from users u left join (SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime FROM pointages   WHERE 1=1 " . $where1 . " GROUP BY id_personnels) as p on u.id = p.id_personnels ".$whereUser;
                         
                         $res = doQuery($sql);
                         $nb = mysql_num_rows($res);

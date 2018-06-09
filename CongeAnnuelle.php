@@ -62,13 +62,18 @@ $_SESSION['breadcrumb_nav4'] = "";
                 <div class="panel-body">
                     <div class="table-responsive">
                         <?php
-                        $sql = "select * from users";
+                        $whereUser = "";
+                        if($_SESSION['role']!=1){
+                            $whereUser = " where u.id=".$_SESSION['user'];   
+                        }
+
+                        $sql = "select * from users u ".$whereUser;
                         $res = doQuery($sql);
                         $nb = mysql_num_rows($res);
                         if ($nb == 0) {
                             echo _VIDE;
                         } else { 
-                            ?>
+                        ?>
                             <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                                 <thead>
                                     <th>Nom</th>
@@ -91,15 +96,13 @@ $_SESSION['breadcrumb_nav4'] = "";
                                             $c = "c";
                                         else
                                             $c = "";
-                                    ?>
-                                     <tr class="<?php echo $c ?>">
-                                            <td><?php echo $ligne['nom']  ?></td>
-                                            <?php for($year=2014;$year<=date('Y');$year++) {?>
-                                                <th style="text-align: center" ><?php echo getSumHolidaysByYearPerUser($ligne['id'], $year) ?></th>
-                                                <th style="text-align: center" ><?php echo getSumCreditByYearPerUser($ligne['id'], $year) ?></th>
-                                            <?php } ?>   
-                                    </tr>
-                                        <?php
+                                        echo "<tr class=".$c.">";
+                                        echo "<td>".$ligne['nom']."</td>"; 
+                                        for($year=2014;$year<=date('Y');$year++) {
+                                                echo "<td style='text-align: center' >".getSumHolidaysByYearPerUser($ligne['id'], $year)."</td>";
+                                                echo "<td style='text-align: center' >".getSumCreditByYearPerUser($ligne['id'], $year)."</td>";
+                                        } 
+                                        echo "</tr>";
                                         $i++;
                                     }
                                     ?>

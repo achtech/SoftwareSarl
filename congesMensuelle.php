@@ -62,8 +62,13 @@ $_SESSION['breadcrumb_nav4'] = "";
                 <div class="panel-body">
                     <div class="table-responsive">
                         <?php
-                        $sql = "select * from users";
-                 $res = doQuery($sql);
+                        $whereUser = "";
+                        if($_SESSION['role']!=1){
+                            $whereUser = " where u.id=".$_SESSION['user'];   
+                        }
+
+                        $sql = "select * from users u ".$whereUser;
+                        $res = doQuery($sql);
                         $year = isset($_REQUEST['annee']) && !empty($_REQUEST['annee']) ? $_REQUEST['annee'] : date('Y');
                         $tab = getHolidaysByYears($year);                        
                         $months = array('JAN','FEB','MAI','APR','MAR','JUN','JUL','AUG','SEP','OCT','NEV','DEC');

@@ -1,5 +1,5 @@
 <?php require_once('head2.php'); ?>
-<body>
+<body style="background-image: 'images/logo2.jpg' !important ">
     <div id="container">
         <div id="logo" style="font-size: 40px;color: white;padding-left: 75px;">
             SOFTWARE

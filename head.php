@@ -11,7 +11,7 @@ if (!isset($_SESSION['admin'])) {
 
 <html >
     <head>
-        <meta charset="iso-8859-1" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>SOFTWARE</title>
         <!-- Bootstrap Styles-->
@@ -37,7 +37,7 @@ if (!isset($_SESSION['admin'])) {
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="index-2.html"><strong>SOFTWARE</strong></a>
+                    <img src="images/logo.jpg" style="width: 260px;height: 60px;">
                 </div>
                 <ul class="nav navbar-top-links navbar-right">
                     <li class="dropdown">
