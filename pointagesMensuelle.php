@@ -154,17 +154,17 @@ $_SESSION['breadcrumb_nav4'] = "";
                                         $nbrHours = ($nbrJour*8).":00:00";                                        
                                         $styleTd1="";
                                         $styleTd2="";
-                                        $pos1 = strpos($rapportMensuelle, "-")>-1?true:false;
-                                        $pos2 = strpos($rapport, "-")>-1?true:false;                                        
+                                       $pos1 = (strpos($rapportMensuelle, "-")>-1)?true:false;
+                                        $pos2 = (strpos($rapport, "-")>-1)?true:false;                                        
                                         if($pos1){
                                             $styleTd1 = "background: red;color: white;font-weight: bold;";
                                         } else {
-                                            if($rapportMensuelle!=0) {
                                                 $styleTd1 = "background: green;color: white;font-weight: bold;";
-                                            }
                                         }
                                         if($pos2){
                                             $styleTd2 = "background: red;color: white;font-weight: bold;";
+                                        }else {
+                                                $styleTd2 = "background: green;color: white;font-weight: bold;";
                                         }
                                         ?>
                                         <tr class="<?php echo $c ?>">

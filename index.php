@@ -120,52 +120,6 @@ $_SESSION['breadcrumb_nav4'] = "";
         </div>
     </div><!--/.row-->
     <?php } ?>
-    <div class="row">
-        <div class="col-xs-6 col-md-4">
-            <div class="panel panel-default">
-                    TODO : 
-                    <ul>
-                        <li>Gestion des documents</li>
-                        <ul>
-                            <li>Attestation de travail</li>
-                            <li>Attestation pôle emploi</li>
-                            <li>Bulletin de paie</li>
-                            <li>Accusé de réception de lettre de démission</li>
-                            <li>Attestation de stage</li>
-                            <li>Attestation salaire</li>
-                        </ul>
-                    </ul>             
-            </div>
-        </div>
-        <div class="col-xs-6 col-md-4">
-            <div class="panel panel-default">
-                    Fill DATA BASE : Pointages 
-                    <ol>
-                        <li>Achraf <b>Done</b></li>
-                        <li>Noura<b>En cours</b></li>
-                        <li>Bihi</li>
-                        <li>Hamza</li>
-                        <li>Saad</li>
-                        <li>Simo</li>
-                        <li>Abdelah<b>Done</b></li>
-                    </ol>
-                    Free days
-                    </div>
-        </div>
-        <div class="col-xs-6 col-md-4">
-            <div class="panel panel-default">
-                    Fill DATA BASE : Conge 
-                    <ol>
-                        <li>Achraf <b>Done</b></li>
-                        <li>Noura<b>En cours</b></li>
-                        <li>Bihi</li>
-                        <li>Hamza</li>
-                        <li>Saad</li>
-                        <li>Simo</li>
-                        <li>Abdelah<b>Done</b></li>
-                    </ol>
-                    </div>
-        </div>
-</div>
+
 
 <?php require_once('foot.php'); ?>

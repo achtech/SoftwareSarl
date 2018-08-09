@@ -18,7 +18,7 @@ $_SESSION['breadcrumb_nav4'] = "";
             <div class="panel panel-default">
                 <div class="panel-body easypiechart-panel">
                     <div class="easypiechart" id="easypiechart-orange" data-percent="55" style="font-size: 60px;width: auto;height: 160px">                              
-                        <a href="pointages.php">Attestation<br> de travail</a>
+                        <a href="attestation_travail.php">Attestation<br> de travail</a>
                     </div>
                 </div>
             </div>
