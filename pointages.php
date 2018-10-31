@@ -112,7 +112,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $where1 .= " and id_personnels=".$_SESSION['user'];   
                         }
 
-                        $sql = "select id,id_personnels,date_pointage,m_start,m_end,s_start,s_end,ADDTIME(TIMEDIFF(m_end, m_start),TIMEDIFF(s_end, s_start )) as d from pointages where 1=1 " . $where1 . " order by id desc";
+                       $sql = "select id,id_personnels,date_pointage,timeIn,timeOut,SUM(TIMESTAMPDIFF(MINUTE, `timeIn`,`timeOut`)) as d from pointages where 1=1 " . $where1 . " group by id_personnels";
                         $res = doQuery($sql);
 
                         $nb = mysql_num_rows($res);
@@ -138,8 +138,6 @@ $_SESSION['breadcrumb_nav4'] = "";
                                 <th>Nom</th>
                                 <th>Entr&eacute; 1</th>
                                 <th>Sortie 1</th>
-                                <th>Entr&eacute; 2</th>
-                                <th>Sortie 2</th>
                                 <th>Somme</th>
                                 <th class="op"> <?php echo _OP ?> </th>
                                 </thead>	
@@ -156,10 +154,8 @@ $_SESSION['breadcrumb_nav4'] = "";
                                         <tr class="<?php echo $c ?>">
                                             <td><?php echo $ligne['date_pointage'] ?></td>
                                             <td><?php echo getValeurChamp('nom', 'users', 'ID', $ligne['id_personnels'])  ?></td>
-                                            <td><?php echo $ligne['m_start'] ?></td>
-                                            <td><?php echo $ligne['m_end'] ?></td>
-                                            <td><?php echo $ligne['s_start'] ?></td>
-                                            <td><?php echo $ligne['s_end'] ?></td>
+                                            <td><?php echo $ligne['timeIn'] ?></td>
+                                            <td><?php echo $ligne['timeOut'] ?></td>
                                             <td><?php echo $ligne['d'] ?></td>
                                             <td class="op">
                                                 &nbsp;

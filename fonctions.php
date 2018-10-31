@@ -546,109 +546,6 @@ function affichage_th($champs) {
     <?php
 }
 
-//fonction affichage valeurs sous forme de tableau
-function affiche_table($champs, $valeurs, $table, $page) {
-    if (count($valeurs) == 0) {
-        ?>
-        <tr>
-            <td colspan="20">
-                <?php echo _TAB_VIDE; ?>
-            </td>
-        <tr>   
-            <?php
-        } else {
-            foreach ($valeurs as $valeur) {
-                //coloration des lignes
-                if ($j % 2 == 0)
-                    $c = "c1";
-                else
-                    $c = "c2";
-                $j++;
-                $id_val = $valeur['id'];
-                ?>	
-            <tr class=<?php echo $c ?>>	
-                <td> <input type="checkbox" name="checkbox" value="<?php echo $id_val ?>" /> </td>
-                <!- - <td><a href="<?php // echo substr($table, 0, -1);   ?>.php?id=<?php //echo $valeur['id']    ?>" ><?php //  echo $valeur[next($champs)]    ?></a></td>- - >
-                <td>
-                    <a href="<?php echo _CHEMIN_ADMIN_WEB . $page ?>?id=<?php echo $id_val ?>" >
-                        <?php echo $valeur[next($champs)] ?>
-                    </a>
-                </td>
-                <?php
-                for ($i = 1; $i < sizeof($valeur) - 1; $i++) {
-                    $champ = next($champs);
-                    if ($champ == 'date_contrat') {
-                        if ($valeur[$champ] == "0000-00-00") {
-                            ?>
-                            <td> 
-                                <span><img src="../img/0.gif"/></span>
-                            </td>
-
-                            <?php
-                        } else {
-                            ?>
-                            <td> 
-                                <span><img src="../img/1.gif"/></span>
-                            </td>
-
-                            <?php
-                        }
-                    } else if ($champ == 'etat') {
-                        if ($table == 'produits') {
-                            $page_retour = 'sec/produits.php';
-                        }
-                        if ($table == 'categories') {
-                            $page_retour = 'manager/categories.php';
-                        }
-                        if ($table == 'caracteristiques') {
-                            $page_retour = 'manager/caracteristiques.php';
-                        }
-                        if ($valeur[$champ] == 0) {
-                            ?>
-                            <td> 
-                                <span><a href="<?php echo _CHEMIN_ADMIN_WEB ?>gestion.php?table=<?php echo $table ?>&page=<?php echo $page_retour ?>&act=etat&champ_modif=etat&id=<?php echo $id_val ?>"><img src="../img/0.gif"/></a></span>
-                            </td>
-
-                            <?php
-                        } else {
-                            ?>
-                            <td> 
-                                <span><a href="<?php echo _CHEMIN_ADMIN_WEB ?>gestion.php?table=<?php echo $table ?>&page=<?php echo $page_retour ?>&act=etat&champ_modif=etat&id=<?php echo $id_val ?>"><img src="../img/1.gif"/></a></span>
-                            </td>
-
-                            <?php
-                        }
-                    } else {
-                        ?>
-                        <td> 
-                            <span><?php echo $valeur[$champ] ?></span>
-                        </td>
-                        <?php
-                    }
-                }
-
-                reset($champs);
-                $tab = split('/', $page);
-                $racine = $tab['0'];
-                ?>
-                <td>
-                    <a href="<?php echo _CHEMIN_ADMIN_WEB . $racine ?>/modifier_<?php echo $table ?>.php?id=<?php echo $valeur['id'] ?>" title="'._MODIFIER.'">
-                        <img src="../img/_nav_dashboard.gif"/>
-                    </a>
-                    <!- - <a href="#" title="'._ADDFAVORIS.'">
-                        <img src="../img/icon_addtofav.gif"/>
-                    </a>- - >
-                    <a href="#" 
-                       onclick="javascript:supprimer('<?php echo $table; ?>', '<?php echo $valeur['id']; ?>', '<?php echo $table . ".php"; ?>')">
-                        <img src="../img/btn_remove-selected_bg.gif" />
-                    </a>
-
-                </td>
-            </tr>
-            <?php
-        }
-    }
-}
 
 /* affichage des titres titre
   input: l url de l icone
@@ -1318,7 +1215,7 @@ function getMinDate($user){
 }
 
 function getSumHours($datefin,$datedebut,$user){
-    $sql = "SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime
+    $sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, `timeIn`,`timeOut`))  as sumTime  
     FROM pointages
     WHERE id_personnels=".$user." and date_pointage between DATE_FORMAT('" . $datedebut . "', '%Y-%m-%d') and DATE_FORMAT('" . $datefin. "', '%Y-%m-%d')";
     $res = doQuery($sql);
@@ -1333,10 +1230,7 @@ function getSumHours($datefin,$datedebut,$user){
 
 function getRapport($user,$currentMonth,$year,$month){
     if(!empty($user)) {
-        // get initial value
-        $initialValue = getValeurChamp('initial_time','pointage_initial','id_personnel',$user);
-        $initialHours = (int)($initialValue/60);
-        $initialMinutes = (int)($initialValue%60); 
+        
         // get first date for the selected user (select min date from pointage)
         $minDate = getMinDate($user);
         // get the current date
@@ -1351,7 +1245,7 @@ function getRapport($user,$currentMonth,$year,$month){
         $sumOfWorkedHours = getSumHours($currentDate,$minDate,$user);
 
         // Sum of free days in Hours
-        $sumOffreeDays = getNombreHeurJourFerie($currentMonth,$year,$month,true,"2018-07-01");
+        $sumOffreeDays = getNombreHeurJourFerie($currentMonth,$year,$month,true,"2018-11-01");
 
         // Sum of Holidays in Hours
         $sumOfHolidays = getNombreJourCongeTotal($user,$year)*8;
@@ -1366,11 +1260,10 @@ function getRapport($user,$currentMonth,$year,$month){
                 $h=$h+1;
                 $m = 60-$m;
             }
-            $res = (int)$initialValue + (int)($h*60) + (int)($m);
+            $res = (int)($h*60) + (int)($m);
             $mm = (abs((int)($res%60)));
             return $result = ((int)($res/60)).":".($mm<10?"0".$mm:$mm).":00";                
-        }else
-            $result =$initialHours.":".$initialMinutes;
+        }
         return $result;
     }
     else {
@@ -1486,7 +1379,7 @@ function getNombreHeurJourFerie($currentMonth,$year,$month,$global,$startDay){
     return $nbrJour*8 ;
 }
 
-
+//TODO
 function nombreJourPerUser($user,$currentMonth,$year,$month){
     if($user){
         if(!empty($currentMonth) || !empty($year) || !empty($month) ){
@@ -1516,13 +1409,12 @@ function nombreJourPerUser($user,$currentMonth,$year,$month){
     }
 }
 function getSommeNombreHeurN($where) {
-  $sql = "SELECT SEC_TO_TIME( SUM( extract(hour from s.total) * 60 * 60+ extract(minute from s.total) * 60 + extract(second from s.total) ) )  as tot
-FROM (SELECT ADDTIME( TIMEDIFF( m_end, m_start ) , TIMEDIFF( s_end, s_start ) ) AS total
-FROM pointages where 1=1  ".$where." ) AS s";
+ $sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, `timeIn`,`timeOut`)) AS total
+FROM pointages where 1=1  ".$where;
     $res = doQuery($sql);
     $nbrHeur = 0;
     while ($ligne = mysql_fetch_array($res)) {
-         $nbrHeur=$ligne['tot'];
+         $nbrHeur=$ligne['total'];
 
     }
     return $nbrHeur;
