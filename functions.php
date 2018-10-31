@@ -89,9 +89,9 @@ function addTimeIn($idUser,$dateTime,$timeIn){
 		connect();
 		echo $sql = "insert into logs(id_personnels,dateOperation,timeIn,timeOut) values(".$idUser.", '".$dateTime."','".$timeIn."','".$timeIn."')";
 		doQuery($sql);
-		commit();
-		$id =  mysql_insert_id();
 		
+		$id =  mysql_insert_id();
+		commit();
 		return $id;
 }
 

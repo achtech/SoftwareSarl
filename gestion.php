@@ -21,5 +21,5 @@
 				 updateColor($id,$color,$idLogs);	
 			}
 		}
-		redirect("index.php");
+		redirect("index2.php");
 	?>
