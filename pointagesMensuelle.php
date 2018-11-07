@@ -116,7 +116,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $whereUser = " where u.id=".$_SESSION['user'];   
                         }
 
-                        $sql = "select u.id as userId,u.nom ,p.id_personnels,p.sumTime from users u left join (SELECT id_personnels, SEC_TO_TIME( SUM( TIME_TO_SEC( m_end ) - TIME_TO_SEC( m_start ) + TIME_TO_SEC( s_end ) - TIME_TO_SEC( s_start ) ) ) AS sumTime FROM pointages   WHERE 1=1 " . $where1 . " GROUP BY id_personnels) as p on u.id = p.id_personnels ".$whereUser;
+                        $sql = "select u.id as userId,u.nom ,p.id_personnels,p.sumTime from users u left join (SELECT id_personnels, SUM(TIMESTAMPDIFF(SECOND, `timeIn`,`timeOut`)) AS sumTime FROM pointages   WHERE 1=1 " . $where1 . " GROUP BY id_personnels) as p on u.id = p.id_personnels ".$whereUser;
                         
                         $res = doQuery($sql);
                         $nb = mysql_num_rows($res);
@@ -170,7 +170,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                                         <tr class="<?php echo $c ?>">
                                             <td><?php echo getValeurChamp('nom', 'users', 'id', $ligne['userId'])  ?></td>
                                             <td><?php echo $dateToShow;  ?></td>
-                                            <td><?php echo empty($ligne['sumTime']) ? "0" : $ligne['sumTime']  ?> / <?php echo $nbrHours ?></td>
+                                            <td><?php echo empty($ligne['sumTime']) ? "0" : getHourFromMinutes($ligne['sumTime'])  ?> / <?php echo $nbrHours ?></td>
                                             <td><?php echo $nbrJour ?></td>
                                             <td><?php echo $freedays ?></td>
                                             <td><?php echo $nbrConge;  ?></td>

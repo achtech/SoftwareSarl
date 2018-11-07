@@ -1488,4 +1488,11 @@ function getSumCreditByYearPerUser($userId, $year){
     }
 }
 
+function getHourFromMinutes($seconds){
+    $h = intval($seconds / 3600);
+    $sec = $seconds - $h*3600;
+    $m = intval($sec / 60);
+    $s =  $sec - $m * 60;
+    return $h.":".($m<10?"0".$m:$m).":".($s<10?"0".$s:$s);
+}
 ?>

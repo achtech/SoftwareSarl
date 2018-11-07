@@ -112,7 +112,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $where1 .= " and id_personnels=".$_SESSION['user'];   
                         }
 
-                       $sql = "select id,id_personnels,date_pointage,timeIn,timeOut,SUM(TIMESTAMPDIFF(MINUTE, `timeIn`,`timeOut`)) as d from pointages where 1=1 " . $where1 . " group by id_personnels";
+                       $sql = "select id,id_personnels,date_pointage,timeIn,timeOut,SUM(TIMESTAMPDIFF(SECOND, `timeIn`,`timeOut`)) as d from pointages where 1=1 " . $where1 . " group by id";
                         $res = doQuery($sql);
 
                         $nb = mysql_num_rows($res);
@@ -156,7 +156,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                                             <td><?php echo getValeurChamp('nom', 'users', 'ID', $ligne['id_personnels'])  ?></td>
                                             <td><?php echo $ligne['timeIn'] ?></td>
                                             <td><?php echo $ligne['timeOut'] ?></td>
-                                            <td><?php echo $ligne['d'] ?></td>
+                                            <td><?php echo getHourFromMinutes($ligne['d']) ?></td>
                                             <td class="op">
                                                 &nbsp;
                                                 <a href="modifier_pointage.php?pointages=<?php echo $ligne['id'] ?>" class="modifier2" title="<?php echo _MODIFIER ?>">
