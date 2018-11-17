@@ -112,7 +112,7 @@ $_SESSION['breadcrumb_nav4'] = "";
                             $where1 .= " and id_personnels=".$_SESSION['user'];   
                         }
 
-                       $sql = "select id,id_personnels,date_pointage,timeIn,timeOut,SUM(TIMESTAMPDIFF(SECOND, `timeIn`,`timeOut`)) as d from pointages where 1=1 " . $where1 . " group by id";
+                       $sql = "select id,id_personnels,date_pointage,timeIn,timeOut,SUM(TIMESTAMPDIFF(SECOND, `timeIn`,`timeOut`)) as d from pointages where 1=1 " . $where1 . " group by id order by date_pointage desc";
                         $res = doQuery($sql);
 
                         $nb = mysql_num_rows($res);
