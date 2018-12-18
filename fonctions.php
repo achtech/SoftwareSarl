@@ -1409,7 +1409,7 @@ function nombreJourPerUser($user,$currentMonth,$year,$month){
     }
 }
 function getSommeNombreHeurN($where) {
- $sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, `timeIn`,`timeOut`)) AS total
+ $sql = "SELECT SUM(TIMESTAMPDIFF(second, `timeIn`,`timeOut`)) AS total
 FROM pointages where 1=1  ".$where;
     $res = doQuery($sql);
     $nbrHeur = 0;
@@ -1417,7 +1417,7 @@ FROM pointages where 1=1  ".$where;
          $nbrHeur=$ligne['total'];
 
     }
-    return $nbrHeur;
+    return getHourFromMinutes($nbrHeur);
 }
 
 function nombreJour2($currentMonth,$year,$month){
